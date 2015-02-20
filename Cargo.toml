@@ -3,3 +3,6 @@
 name = "mio-echo"
 version = "0.0.1"
 authors = ["Luke Rodgers <lukeasrodgers@gmail.com>"]
+
+[dependencies.mio]
+git = "https://github.com/carllerche/mio"
