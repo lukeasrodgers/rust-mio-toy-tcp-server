@@ -33,17 +33,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "mio"
 version = "0.2.1"
-source = "git+https://github.com/carllerche/mio#ed910ca76b987a44aee3497e325be5faac40e0c8"
+source = "git+https://github.com/carllerche/mio#aefbc348135f237a9deede12f0978c42a20f7e44"
 dependencies = [
  "bytes 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "nix 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nix 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.17 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "nix"
-version = "0.2.1"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bitflags 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
