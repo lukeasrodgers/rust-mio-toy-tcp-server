@@ -1,6 +1,5 @@
 extern crate mio;
 
-
 use mio::*;
 use mio::net::{SockAddr};
 use mio::net::tcp::{TcpSocket, TcpAcceptor};
@@ -11,6 +10,7 @@ fn main() {
     struct EchoHandler;
     impl Handler<(), String> for EchoHandler {
         fn notify(&mut self, event_loop: &mut EventLoop<(), String>, msg: String) {
+            print!("{}", msg);
             if msg.as_slice() == "done\n" {
                 event_loop.shutdown();
             }
@@ -23,9 +23,10 @@ fn main() {
         let mut stdin = old_io::stdin();
         loop {
             for line in stdin.lock().lines() {
-                let _ = sender.send(line.unwrap());
+                sender.send(line.unwrap());
             }
         }
     });
-    let _ = event_loop.run(EchoHandler);
+
+    event_loop.run(EchoHandler);
 }
