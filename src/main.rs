@@ -17,7 +17,7 @@ fn main() {
     event_loop.register(&server, SERVER).unwrap();
 
     struct TcpHandler {
-        conns: Slab<TcpSocket>,
+        conn: Option<TcpSocket>,
         sock: TcpAcceptor
     };
 
@@ -25,8 +25,12 @@ fn main() {
         fn accept(&mut self, event_loop: &mut EventLoop<(), ()>) {
             let conn = self.sock.accept();
             let sock = conn.unwrap().unwrap();
-            let tok = self.conns.insert(sock).ok().expect("could not add connection to slab");
-            event_loop.register_opt(&self.conns[tok], tok, Interest::readable(), PollOpt::edge() | PollOpt::oneshot());
+            let tok = Token(2);
+            self.conn = Some(sock);
+            match self.conn {
+                Some(ref c) => { event_loop.register_opt(c, tok, Interest::readable(), PollOpt::edge() | PollOpt::oneshot()); }
+                None => { }
+            }
         }
     }
 
@@ -40,32 +44,37 @@ fn main() {
                     println!("tok: {}", tok.as_usize());
                     let mut read_buf = ByteBuf::mut_with_capacity(2048);
                     let mut interest = Interest::readable();
-                    match self.conns[tok].read(&mut read_buf) {
-                        Ok(NonBlock::WouldBlock) => {
-                            panic!("We just got readable, but were unable to read from the socket?");
-                        }
-                        Ok(NonBlock::Ready(r)) => {
-                            let mut buf = read_buf.flip();
-                            let mut sl = [0; 2048];
-                            buf.read_slice(&mut sl);
-                            print!("{}", String::from_utf8(sl.to_vec()).unwrap());
-                            // self.interest.remove(Interest::readable());
-                            // self.interest.insert(Interest::writable());
-                        }
-                        Err(e) => {
-                            event_loop.shutdown();
-                            // println!("not implemented; client err={:?}", e);
-                            // interest = Interest::hup();
-                            // self.interest.remove(Interest::readable());
-                        }
+                    match self.conn {
+                        Some(ref c) => {
+                            match c.read(&mut read_buf) {
+                                Ok(NonBlock::WouldBlock) => {
+                                    panic!("We just got readable, but were unable to read from the socket?");
+                                }
+                                Ok(NonBlock::Ready(r)) => {
+                                    let mut buf = read_buf.flip();
+                                    let mut sl = [0; 2048];
+                                    buf.read_slice(&mut sl);
+                                    print!("{}", String::from_utf8(sl.to_vec()).unwrap());
+                                    // self.interest.remove(Interest::readable());
+                                    // self.interest.insert(Interest::writable());
+                                }
+                                Err(e) => {
+                                    event_loop.shutdown();
+                                    // println!("not implemented; client err={:?}", e);
+                                    // interest = Interest::hup();
+                                    // self.interest.remove(Interest::readable());
+                                }
+                            }
+                            event_loop.reregister(c, tok, interest, PollOpt::edge() | PollOpt::oneshot());
+                        },
+                        None => { }
                     }
-                    event_loop.reregister(&self.conns[tok], tok, interest, PollOpt::edge() | PollOpt::oneshot());
                 }
             }
         }
     }
     let mut tcp_server = TcpHandler {
-        conns: Slab::new_starting_at(Token(2), 128),
+        conn: None,
         sock: server
     };
     let _ = event_loop.run(&mut tcp_server);
