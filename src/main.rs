@@ -4,7 +4,6 @@ use mio::*;
 use mio::net::{SockAddr};
 use mio::net::tcp::{TcpSocket, TcpAcceptor};
 use mio::buf::{ByteBuf, MutByteBuf, SliceBuf};
-use mio::util::Slab;
 
 fn main() {
     const SERVER: Token = Token(1);
