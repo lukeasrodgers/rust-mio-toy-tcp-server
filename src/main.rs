@@ -3,6 +3,7 @@ extern crate mio;
 use mio::*;
 use mio::net::{SockAddr};
 use mio::net::tcp::{TcpSocket, TcpAcceptor};
+use mio::buf::{ByteBuf, MutByteBuf, SliceBuf};
 use mio::util::Slab;
 
 fn main() {
@@ -37,19 +38,19 @@ fn main() {
                 }
                 tok => {
                     println!("tok: {}", tok.as_usize());
-                    let mut read_buf = [0, 4096];
+                    let mut read_buf = ByteBuf::mut_with_capacity(2048);
                     match self.conns[tok].read(&mut read_buf) {
                         Ok(NonBlock::WouldBlock) => {
                             panic!("We just got readable, but were unable to read from the socket?");
                         }
                         Ok(NonBlock::Ready(r)) => {
                             println!("CONN : we read {} bytes!", r);
-                            self.interest.remove(Interest::readable());
-                            self.interest.insert(Interest::writable());
+                            // self.interest.remove(Interest::readable());
+                            // self.interest.insert(Interest::writable());
                         }
                         Err(e) => {
                             println!("not implemented; client err={:?}", e);
-                            self.interest.remove(Interest::readable());
+                            // self.interest.remove(Interest::readable());
                         }
                     }
                 }
