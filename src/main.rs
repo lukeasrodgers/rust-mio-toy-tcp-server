@@ -45,13 +45,17 @@ fn main() {
                             panic!("We just got readable, but were unable to read from the socket?");
                         }
                         Ok(NonBlock::Ready(r)) => {
-                            println!("CONN : we read {} bytes!", r);
+                            let mut buf = read_buf.flip();
+                            let mut sl = [0; 2048];
+                            buf.read_slice(&mut sl);
+                            print!("{}", String::from_utf8(sl.to_vec()).unwrap());
                             // self.interest.remove(Interest::readable());
                             // self.interest.insert(Interest::writable());
                         }
                         Err(e) => {
-                            println!("not implemented; client err={:?}", e);
-                            interest = Interest::hup();
+                            event_loop.shutdown();
+                            // println!("not implemented; client err={:?}", e);
+                            // interest = Interest::hup();
                             // self.interest.remove(Interest::readable());
                         }
                     }
