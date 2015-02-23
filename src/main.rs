@@ -39,6 +39,7 @@ fn main() {
                 tok => {
                     println!("tok: {}", tok.as_usize());
                     let mut read_buf = ByteBuf::mut_with_capacity(2048);
+                    let mut interest = Interest::readable();
                     match self.conns[tok].read(&mut read_buf) {
                         Ok(NonBlock::WouldBlock) => {
                             panic!("We just got readable, but were unable to read from the socket?");
@@ -50,9 +51,11 @@ fn main() {
                         }
                         Err(e) => {
                             println!("not implemented; client err={:?}", e);
+                            interest = Interest::hup();
                             // self.interest.remove(Interest::readable());
                         }
                     }
+                    event_loop.reregister(&self.conns[tok], tok, interest, PollOpt::edge() | PollOpt::oneshot());
                 }
             }
         }
