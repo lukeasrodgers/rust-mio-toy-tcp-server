@@ -1,6 +1,8 @@
 /*
  * Simple tcp listener, similar to `nc -l 13265`.
- * Will listen for TCP connections on port 13265, accept
+ * Will listen for TCP connections on port 13265, accept a single connection, and terminate when
+ * client closes connection.
+ * Data read will be printed to STDOUT.
  */
 extern crate mio;
 
